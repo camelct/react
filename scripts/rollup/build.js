@@ -185,7 +185,7 @@ function getRollupOutputOptions(
     freeze: !isProduction,
     interop: false,
     name: globalName,
-    sourcemap: false,
+    sourcemap: true,
     esModule: false,
   };
 }
@@ -341,11 +341,11 @@ function getPlugins(
       )
     ),
     // Remove 'use strict' from individual source files.
-    {
-      transform(source) {
-        return source.replace(/['"]use strict["']/g, '');
-      },
-    },
+    // {
+    //   transform(source) {
+    //     return source.replace(/['"]use strict["']/g, '');
+    //   },
+    // },
     // Turn __DEV__ and process.env checks into constants.
     replace({
       __DEV__: isProduction ? 'false' : 'true',
@@ -393,18 +393,18 @@ function getPlugins(
         bracketSpacing: true,
       }),
     // License and haste headers, top-level `if` blocks.
-    {
-      renderChunk(source) {
-        return Wrappers.wrapBundle(
-          source,
-          bundleType,
-          globalName,
-          filename,
-          moduleType,
-          bundle.wrapWithModuleBoundaries
-        );
-      },
-    },
+    // {
+    //   renderChunk(source) {
+    //     return Wrappers.wrapBundle(
+    //       source,
+    //       bundleType,
+    //       globalName,
+    //       filename,
+    //       moduleType,
+    //       bundle.wrapWithModuleBoundaries
+    //     );
+    //   },
+    // },
     // Record bundle size.
     sizes({
       getSize: (size, gzip) => {
@@ -741,7 +741,16 @@ async function buildEverything() {
 
   // eslint-disable-next-line no-for-of-loops/no-for-of-loops
   for (const [bundle, bundleType] of bundles) {
-    await createBundle(bundle, bundleType);
+    
+    // 这里改变
+    // react.development.js  umd_dev
+    // react.production.min.js  umd_prod
+    
+    // react-dom.development.js  umd_dev
+    // react-dom.production.min.js  umd_prod
+    if (['react-dom', 'react'].includes(bundle.entry) && ['UMD_DEV'].includes(bundleType)) {
+      await createBundle(bundle, bundleType);
+    }
   }
 
   await Packaging.copyAllShims();
